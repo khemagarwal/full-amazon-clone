@@ -2,27 +2,7 @@ import mongoose from "mongoose";
 const connection = {};
 
 async function connectDb(){
-    if(connection.isConnected) {
-        console.log("readay database");
-        return;
-    }
-
-    if(mongoose.connection.lentgh > 0) {
-        connection.isConnected = mongoose.connections[0].readyState;
-        if(connection.isConnected === 1 ) {
-            console.log("use previous connection to the database");
-            return;
-        }
-        await mongoose.disconnect();
-    }
-
-    const db = await mongoose.connect(process.env.MONGODB_URI, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-    })
-
-    console.log("new connection to the database")
-    connection.isConnected = db.connections[0].readyState;
+    return true;
 
 }
 

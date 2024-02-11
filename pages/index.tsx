@@ -6,12 +6,13 @@ import Product from "@/models/Product";
 import Category from "@/models/Category";
 import HomeProductSwiper from "@/components/Home/HomeProductSwiper";
 import CategoriesProduct from "@/components/Home/CategoriesProduct/CategoriesProducts";
-import db from "../utils/db";
+// import db from "../utils/db";
+import SignIn from "./auth/signin";
 
 export default function Home({ products }: any) {
     return (
         <>
-            <Header title="Full Amazon Clone React" />
+            {/* <Header title="Full Amazon Clone React" />
             <main className="max-w-screen-2xl mx-auto bg-gray-100">
                 <CarouselContainer />
                 <CategoriesProduct products={products} />
@@ -23,21 +24,23 @@ export default function Home({ products }: any) {
                 </div>
             </main>
             <Footer />
-            <MenuSideBar />
+            <MenuSideBar /> */}
+
+            <SignIn />
         </>
     );
 }
 
-export const getServerSideProps = async (context: any) => {
-    db.connectDb();
-    const products = await Product.find()
-        .populate({ path: "category", model: Category })
-        .sort({ updatedAt: -1 })
-        .lean();
-    db.disconnectDb();
-    return {
-        props: {
-            products: JSON.parse(JSON.stringify(products)),
-        },
-    };
-};
+// export const getServerSideProps = async (context: any) => {
+//     db.connectDb();
+//     const products = await Product.find()
+//         .populate({ path: "category", model: Category })
+//         .sort({ updatedAt: -1 })
+//         .lean();
+//     db.disconnectDb();
+//     return {
+//         props: {
+//             products: JSON.parse(JSON.stringify(products)),
+//         },
+//     };
+// };
